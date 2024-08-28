@@ -1,3 +1,6 @@
+#! /usr/bin/python3
+#
+
 import sys
 import asyncio
 import math
@@ -5,12 +8,33 @@ import moteus
 import argparse
 import time
 
-#Code copied from Moteus example "synchronized movement"
-parser = argparse.ArgumentParser()
+def custom_usage():
+    return f'''Usage: python {sys.argv[0]} <mode> <time> <velocity> [options]
 
+Mandatory arguments:
+  mode        Specify the mode, one of: "demo", "forward", "backward", "right", "left", "init"
+              (first letter is sufficient)
+  time        Specify the duration in seconds (float)
+  velocity    Specify the velocity in revolutions per sec (float)
+
+
+Optional arguments:
+  --no-synchronize    Disable synchronization
+  -v, --verbose       Increase output verbosity
+'''
+
+parser = argparse.ArgumentParser(usage=custom_usage(), add_help=False)
+
+# Optional arguments
 parser.add_argument('--no-synchronize', action='store_true')
 parser.add_argument('--verbose', '-v', action='store_true')
 
+# Mandatory arguments
+parser.add_argument('mode', type=str, help='Specify the mode')
+parser.add_argument('time', type=float, help='Specify the time')
+parser.add_argument('velocity', type=float, help='Specify the velocity')
+
+#Code copied from Moteus example "synchronized movement"
 args = parser.parse_args()
 
 #Number of motors
@@ -19,10 +43,10 @@ SERVO_IDS = [1,2]
 qr = moteus.QueryResolution()
 qr.trajectory_complete = moteus.INT8
 
-#Generate controller
+# Generate controller
 controllers = {x: moteus.Controller(x, query_resolution=qr) for x in SERVO_IDS}
-#Generate streams for commands
-streams = {y: moteus.Stream(y) for y in controllers}
+# Generate streams (indexed by their espective controller) for commands
+streams = {y: moteus.Stream(y) for y in controllers.values()}
 
 #Code copied from Moteus example "synchronized movement"
 def _calculate_ms_delta(time1, time2):
@@ -181,35 +205,44 @@ class Poller:
                 return
 
 #Check modus and call correct function
-def main(modus, time, v):
-        
-    #Initialization of the motors, they will be set to position 0
-    initialize()
+async def main(modus, time, v):
+
+    # Initialization of the motors without moving.
+    await initialize(0)
     if modus[0]=="d":
         print("Demo-drive")
-        demo_drive(v)
+        await demo_drive(v)
     elif modus[0]=="f":
         print("Modus forward")
-        forward(time,v)
+        await forward(time, v)
     elif modus[0]=="b":
         print("Modus backward")
-        backward(time,v)
+        await backward(time, v)
     elif modus[0]=="r":
         print("Modus right")
-        right(time,v)
+        await right(time, v)
     elif modus[0]=="l":
         print("Modus left")
-        left(time,v)
+        await left(time, v)
+    elif modus[0]=="i":
+        # full initialization of the motors. They will be set to position 0
+        await initialize(1)
+    else:
+        print(f"ERROR: unknown mode %{modus}. Try {parser.prog} --help")
+        sys.exit(1)
 
-async def initialize():
+async def initialize(full):
+    #remove validation of positions
+    print("maximum position set to NaN")
+    for c in streams: await streams[c].command(b"conf set servopos.position_min NaN")
+    print("minimum position set to NaN")
+    for c in streams: await streams[c].command(b"conf set servopos.position_max NaN")
+
+    if not full: return
+
     print("Attention: Initalizing wheels")
     await asyncio.sleep(5)
-    #remove validation of positions
-    for stream in streams.values(): await stream.command(b"conf set servopos.position_min NaN")
-    print("minimum position set to NaN")
-    for stream in streams.values(): await stream.command(b"conf set servopos.position_max NaN")
-    print("maximum position set to NaN")
-   
+
     poller = Poller(controllers, args)
 
     # Tell all the servos to go to position 0.0.
@@ -224,11 +257,11 @@ async def initialize():
 
 async def demo_drive(v):
     #Demo-Program
-    forward(5, v)
-    right(5, v)
-    backward(5, v)
-    left(5, v)
-    forward(5, v)
+    await forward(5, v)
+    await right(5, v)
+    await backward(5, v)
+    await left(5, v)
+    await forward(5, v)
 
 async def forward(time, v):
     print("drive forward")
@@ -259,12 +292,5 @@ async def left(time, v):
 
 if __name__ == '__main__':
 
-    if len(sys.argv) != 3:
+        asyncio.run(main(args.mode, args.time, args.velocity))
 
-        print('Invalid Numbers of Arguments, should be modus (Demo-drive, forward, backward, right, left), time (in sec) and velocity (revolutions per sec). Script will be terminated.')
-
-    else:
-        modus=sys.argv[1]
-        time=float(sys.argv[2])
-        v=float(sys.argv(3))
-        asyncio.run(main(modus, time, v))
