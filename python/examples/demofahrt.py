@@ -9,7 +9,7 @@ import argparse
 import time
 
 def custom_usage():
-    return f'''Usage: python {sys.argv[0]} <mode> <time> <velocity> [options]
+    return f'''Usage: python {sys.argv[0]} [options] <mode> <time> <velocity>
 
 Mandatory arguments:
   mode        Specify the mode, one of: "demo", "forward", "backward", "right", "left", "init"
@@ -99,6 +99,8 @@ class ServoClock:
         '''This should be called at a regular interval, no more often than
         once per second.
         '''
+
+        print("ServoClock.update_second()")
 
         old_state = self.state
 
@@ -241,7 +243,7 @@ async def initialize(full):
     if not full: return
 
     print("Attention: Initalizing wheels")
-    await asyncio.sleep(5)
+    await asyncio.sleep(1)
 
     poller = Poller(controllers, args)
 
@@ -251,9 +253,9 @@ async def initialize(full):
 
     await poller.wait_for_event(
         lambda: all([x.values[moteus.Register.TRAJECTORY_COMPLETE]
-                     for x in poller.servo_data.values()]),
-        timeout=5.0)
+                     for x in poller.servo_data.values()]), timeout=5.0)
     print("Initilazation completed")
+
 
 async def demo_drive(v):
     #Demo-Program
@@ -266,17 +268,23 @@ async def demo_drive(v):
 async def forward(time, v):
     print("drive forward")
     # Tell all the servos to go forward with given time in sec and velocity v in rotations per second
-    [await servo.set_position(
-        position=math.nan, velocity=v, accel_limit=5.0, watchdog_timeout=time)
+    [await asyncio.wait_for(servo.set_position(
+        position=math.nan, velocity=v, accel_limit=5.0, watchdog_timeout=math.nan), timeout=time)
      for servo in controllers.values()]
+
+    poller = Poller(controllers, args)
+    await poller.wait_for_event(
+        lambda: all([x.values[moteus.Register.TRAJECTORY_COMPLETE]
+                     for x in poller.servo_data.values()]), timeout=5.0)
 
 
 async def backward(time, v):
     print("drive backward")
     # Tell all the servos to go backward with given time in sec and velocity v in rotations per second
     [await servo.set_position(
-        position=math.nan, velocity=v*(-1), accel_limit=5.0, watchdog_timeout=time)
+        position=math.nan, velocity=v*(-1), accel_limit=5.0, watchdog_timeout=math.nan)
      for servo in controllers.values()]
+
 
 async def right(time, v):
     print("drive right")
