@@ -1,5 +1,7 @@
 #! /usr/bin/python3
 #
+# References:
+#       https://github.com/mjbots/moteus/blob/main/docs/reference.md#velocity-control
 
 import sys
 import asyncio
