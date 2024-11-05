@@ -1,5 +1,3 @@
-
-<<<<<<< HEAD
 # Balancing Lower Body for PIB the Humanoid Robot
 
 ## Introduction
@@ -17,7 +15,6 @@ Clone the repository and navigate to the balancing directory:
 ```
 git clone https://github.com/pib-rocks/moteus-motor-control.git
 cd moteus-motor-control/python/balancing
-=======
 ```
 Install the required Python packages:
 ```
