@@ -175,9 +175,9 @@ $$
 
 Where \( P \) is the solution to the CARE. The control law becomes:
 
-$$
+
 u = -Kx
-$$
+
 [Disturbance compensation with LQR](https://youtube.com/shorts/rGGWK-xfWDU?feature=share)
 ### Running the LQR Script
 
@@ -187,7 +187,7 @@ Execute the LQR balancing script:
 python3 lqr_balancing.py
 ```
 
-Ensure that the \( Q \) and \( R \) matrices are appropriately chosen in the script to balance performance and control effort. Proper tuning of these matrices is crucial for achieving optimal balancing behavior. For simplicity, in the current script there is a variable named "scale_factor" that should be adjusted to scale control output.
+Ensure that the Q and R matrices are appropriately chosen in the script to balance performance and control effort. Proper tuning of these matrices is crucial for achieving optimal balancing behavior. For simplicity, in the current script there is a variable named "scale_factor" that should be adjusted to scale control output.
 
 ## References
 
