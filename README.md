@@ -1,4 +1,4 @@
-# Balancing Lower Body for PIB the Humanoid Robot
+# Balancing Lower Body for pib
 
 ## Introduction
 
