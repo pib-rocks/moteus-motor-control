@@ -1,5 +1,3 @@
-
-<<<<<<< HEAD
 # Balancing Lower Body for PIB the Humanoid Robot
 
 ## Introduction
@@ -120,7 +118,8 @@ These nonlinear equations describe the coupling between the cart and pendulum dy
 ## State-Space Representation
 
 Linearizing the system around the upright position (\( \theta \approx 0 \)), we obtain the state-space representation:
-![Inverted pendulum cart](media/inverted_pendulim_cart.png)
+![Inverted pendulum cart](media/inverted_pendulum_cart.png)
+
 $$
 \dot{\mathbf{x}} = A \mathbf{x} + B u
 $$
@@ -195,6 +194,7 @@ Where \( P \) is the solution to the CARE. The control law becomes:
 $$
 u = -K \mathbf{x}
 $$
+
 [Disturbance compensation with LQR](https://youtube.com/shorts/rGGWK-xfWDU?feature=share)
 ### Running the LQR Script
 
