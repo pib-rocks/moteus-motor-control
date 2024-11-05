@@ -176,7 +176,7 @@ $$
 Where \( P \) is the solution to the CARE. The control law becomes:
 
 $$
-u = -K \mathbf{x}
+u = -Kx
 $$
 [Disturbance compensation with LQR](https://youtube.com/shorts/rGGWK-xfWDU?feature=share)
 ### Running the LQR Script
